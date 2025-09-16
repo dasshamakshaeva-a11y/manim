@@ -1,0 +1,187 @@
+from manim import *
+import numpy as np
+
+class CountingSong(Scene):
+    def construct(self):
+        # Настройки
+        title_color = "#FF9E00"  # Оранжевый
+        text_color = "#FFFFFF"   # Белый
+        number_color = "#FFD700" # Золотой
+        background_color = "#1E90FF" # Тёмно-синий
+        
+        # Установим цвет фона
+        self.camera.background_color = background_color
+        
+        # Создадим заголовок
+        title = Text("Let's All Count Together!", color=title_color, font_size=60)
+        self.play(Write(title))
+        self.wait(1)
+        self.play(FadeOut(title))
+        
+        # Слова песни с соответствующими визуальными элементами
+        verses = [
+            # Verse 1
+            {"text": "I see one red apple on the tree.", "items": [("apple", 1, RED, 0.4)]},
+            {"text": "I see two little birds looking at me.", "items": [("bird", 2, "#ADD8E6", 0.3)]},
+            {"text": "I see three butterflies, yellow and blue.", "items": [("butterfly", 3, ["#FFFF00", "#0000FF"], 0.3)]},
+            {"text": "I see four airplanes flying right through.", "items": [("airplane", 4, "#AAAAAA", 0.4)]},
+            
+            # Chorus
+            {"text": "Let's all count together, one by one!", "items": []},
+            {"text": "Counting all the things under the sun.", "items": [("sun", 1, "#FF4500", 0.6)]},
+            {"text": "Let's all count together, it's so much fun!", "items": []},
+            {"text": "From morning until the day is done.", "items": []},
+            
+            # Verse 2
+            {"text": "I see five balloons up in the sky.", "items": [("circle", 5, ["#FF0000", "#00FF00", "#0000FF", "#FFFF00", "#FF00FF"], 0.2)]},
+            {"text": "I see six fluffy clouds floating by.", "items": [("cloud", 6, "#FFFFFF", 0.4)]},
+            {"text": "I see seven flowers by the door.", "items": [("flower", 7, "#FF69B4", 0.3)]},
+            {"text": "I see eight cookies, I want more!", "items": [("circle", 8, "#8B4513", 0.2)]},
+            
+            # Chorus
+            {"text": "Let's all count together, one by one!", "items": []},
+            {"text": "Counting all the things under the sun.", "items": [("sun", 1, "#FF4500", 0.6)]},
+            {"text": "Let's all count together, it's so much fun!", "items": []},
+            {"text": "From morning until the day is done.", "items": []},
+            
+            # Verse 3
+            {"text": "I see nine pencils in a line.", "items": [("rectangle", 9, "#964B00", 0.1)]},
+            {"text": "I see ten stars that brightly shine.", "items": [("star", 10, "#FFFF00", 0.2)]},
+            {"text": "I see eleven dolphins in the sea.", "items": [("dolphin", 11, "#87CEEB", 0.3)]},
+            {"text": "I see twelve leaves on the big oak tree.", "items": [("leaf", 12, "#00FF00", 0.2)]},
+            
+            # Bridge
+            {"text": "Almost there, let's not stop now!", "items": []},
+            {"text": "Count with me, I'll show you how!", "items": []},
+            
+            # Final Count
+            {"text": "Thirteen!", "items": [("circle", 13, "#FF0000", 0.15)]},
+            {"text": "Fourteen!", "items": [("circle", 14, "#00FF00", 0.15)]},
+            {"text": "Fifteen!", "items": [("circle", 15, "#0000FF", 0.15)]},
+            
+            # Final Chorus
+            {"text": "We all counted together, one by one!", "items": []},
+            {"text": "We counted all the things under the sun.", "items": [("sun", 1, "#FF4500", 0.6)]},
+            {"text": "We all counted together, it was so much fun!", "items": []},
+            {"text": "Our counting adventure is done!", "items": []},
+        ]
+        
+        # Анимация для каждого куплета
+        for verse in verses:
+            # Отображаем текст песни
+            text = Text(verse["text"], color=text_color, font_size=36)
+            text.to_edge(UP)
+            self.play(Write(text))
+            
+            # Создаем визуальные элементы, если они есть
+            if verse["items"]:
+                all_items = VGroup()
+                for item_type, count, color, size in verse["items"]:
+                    items = self.create_items(item_type, count, color, size)
+                    all_items.add(items)
+                
+                self.play(Create(all_items))
+                self.wait(0.5)
+                self.play(FadeOut(all_items))
+            
+            self.wait(0.5)
+            self.play(FadeOut(text))
+        
+        # Финальная сцена
+        final_text = Text("Great job counting! 🎉", color=title_color, font_size=50)
+        self.play(Write(final_text))
+        self.wait(2)
+        self.play(FadeOut(final_text))
+    
+    def create_items(self, item_type, count, color, size):
+        """Создает группу элементов заданного типа"""
+        items = VGroup()
+        
+        # Если цвет - список, используем разные цвета для каждого элемента
+        if isinstance(color, list):
+            colors = color
+        else:
+            colors = [color] * count
+        
+        for i in range(count):
+            if item_type == "apple":
+                item = Circle(radius=size, color=colors[i], fill_opacity=1)
+                # Добавляем стебель
+                stem = Line(
+                    start=item.get_top(),
+                    end=item.get_top() + UP * size * 0.5,
+                    color="#8B4513",
+                    stroke_width=size * 5
+                )
+                item = VGroup(item, stem)
+            elif item_type == "bird":
+                item = Triangle(color=colors[i], fill_opacity=1).scale(size)
+            elif item_type == "butterfly":
+                left_wing = Circle(radius=size, color=colors[i], fill_opacity=1)
+                right_wing = Circle(radius=size, color=colors[i], fill_opacity=1)
+                right_wing.next_to(left_wing, RIGHT, buff=0)
+                body = Rectangle(height=size*2, width=size*0.5, color="#000000", fill_opacity=1)
+                body.move_to(left_wing.get_center() + RIGHT * size * 0.5)
+                item = VGroup(left_wing, right_wing, body)
+            elif item_type == "airplane":
+                body = Rectangle(height=size*0.5, width=size*2, color=colors[i], fill_opacity=1)
+                wings = Rectangle(height=size, width=size*0.5, color=colors[i], fill_opacity=1)
+                wings.move_to(body.get_center())
+                item = VGroup(body, wings)
+            elif item_type == "sun":
+                item = Circle(radius=size, color=colors[i], fill_opacity=1)
+                # Добавляем лучи
+                rays = VGroup()
+                for angle in np.linspace(0, 2*PI, 12, endpoint=False):
+                    ray = Line(
+                        start=item.get_center(),
+                        end=item.get_center() + np.array([np.cos(angle), np.sin(angle), 0]) * size * 1.5,
+                        color=colors[i],
+                        stroke_width=size * 3
+                    )
+                    rays.add(ray)
+                item = VGroup(item, rays)
+            elif item_type == "cloud":
+                # Простое облако из нескольких кругов
+                circles = VGroup()
+                for j in range(3):
+                    circle = Circle(radius=size*(0.8+j*0.2), color=colors[i], fill_opacity=1)
+                    circles.add(circle)
+                circles.arrange(RIGHT, buff=size*0.5)
+                item = circles
+            elif item_type == "flower":
+                center = Circle(radius=size*0.3, color="#FFD700", fill_opacity=1)
+                petals = VGroup()
+                for angle in np.linspace(0, 2*PI, 5, endpoint=False):
+                    petal = Ellipse(
+                        width=size, height=size*0.6, 
+                        color=colors[i], fill_opacity=1
+                    )
+                    petal.rotate(angle)
+                    petal.move_to(center.get_center() + np.array([np.cos(angle), np.sin(angle), 0]) * size * 0.8)
+                    petals.add(petal)
+                item = VGroup(center, petals)
+            elif item_type == "star":
+                item = Star(5, outer_radius=size, color=colors[i], fill_opacity=1)
+            elif item_type == "dolphin":
+                body = Ellipse(width=size*2, height=size, color=colors[i], fill_opacity=1)
+                fin = Triangle(color=colors[i], fill_opacity=1).scale(size*0.5)
+                fin.rotate(PI/4)
+                fin.next_to(body, UP, buff=0)
+                item = VGroup(body, fin)
+            elif item_type == "leaf":
+                item = Ellipse(width=size, height=size*1.5, color=colors[i], fill_opacity=1)
+            else:  # circle или rectangle по умолчанию
+                if item_type == "rectangle":
+                    item = Rectangle(height=size*3, width=size, color=colors[i], fill_opacity=1)
+                else:
+                    item = Circle(radius=size, color=colors[i], fill_opacity=1)
+            
+            items.add(item)
+        
+        # Располагаем элементы на экране
+        if count > 1:
+            items.arrange(RIGHT, buff=0.5)
+        items.move_to(ORIGIN)
+        
+        return items
